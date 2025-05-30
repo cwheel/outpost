@@ -1,8 +1,9 @@
 import os
 import logging
+from logging import Logger
 from logging.handlers import RotatingFileHandler
 
-def get_logger():
+def get_logger() -> Logger:
     logger = logging.getLogger('outpost')
     logger.setLevel(logging.DEBUG)
     
