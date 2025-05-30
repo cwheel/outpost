@@ -21,7 +21,7 @@ class PositionResource(Resource):
         return aiocoap.Message(mtype=aiocoap.ACK)
 
 class OutpostServer:
-    def __init__(self, host='0.0.0.0', port=5683, use_dtls=False):
+    def __init__(self, host='0.0.0.0', port=5683):
         self.host = host
         self.port = port
         self.context = None
@@ -80,6 +80,3 @@ async def main():
     except Exception as e:
         logger.error(f"Server error: {e}")
         sys.exit(1)
-
-if __name__ == "__main__":
-    asyncio.run(main())

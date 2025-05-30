@@ -1,0 +1,32 @@
+services:
+  outpost:
+    build: .
+    environment:
+      - DEBUG=$DEBUG
+    ports:
+      - "5683:5683/udp"
+    restart: unless-stopped
+    networks:
+      - monitoring
+  
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: postgres_postgis
+    environment:
+      POSTGRES_DB: outpost
+      POSTGRES_USER: outpost
+      POSTGRES_PASSWORD: outpost
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+    driver: local
