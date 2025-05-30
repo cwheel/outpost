@@ -1,0 +1,18 @@
+[project]
+name = "outpost"
+version = "0.1.0"
+description = "Live GPS synchronization from remote Victron systems to PostGIS"
+authors = [
+    {name = "Cameron Wheeler"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiocoap (>=0.4.14,<0.5.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
