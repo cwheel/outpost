@@ -62,6 +62,18 @@ testing = ["covdefaults (>=2.3)", "coverage (>=7.6.10)", "diff-cover (>=9.2.1)",
 typing = ["typing-extensions (>=4.12.2) ; python_version < \"3.11\""]
 
 [[package]]
+name = "future"
+version = "1.0.0"
+description = "Clean single-source support for Python 3 and 2"
+optional = false
+python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
+groups = ["main"]
+files = [
+    {file = "future-1.0.0-py3-none-any.whl", hash = "sha256:929292d34f5872e70396626ef385ec22355a1fae8ad29e1a734c3e43f9fbc216"},
+    {file = "future-1.0.0.tar.gz", hash = "sha256:bd2968309307861edae1458a4f8a4f3598c03be43b97521076aebf5d94c07b05"},
+]
+
+[[package]]
 name = "identify"
 version = "2.6.12"
 description = "File identification library for Python"
@@ -75,6 +87,18 @@ files = [
 
 [package.extras]
 license = ["ukkonen"]
+
+[[package]]
+name = "iso8601"
+version = "0.1.16"
+description = "Simple module to parse ISO 8601 dates"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "iso8601-0.1.16-py2.py3-none-any.whl", hash = "sha256:906714829fedbc89955d52806c903f2332e3948ed94e31e85037f9e0226b8376"},
+    {file = "iso8601-0.1.16.tar.gz", hash = "sha256:36532f77cc800594e8f16641edae7f1baf7932f05d8e508545b95fc53c6dc85b"},
+]
 
 [[package]]
 name = "mypy"
@@ -203,12 +227,43 @@ pyyaml = ">=5.1"
 virtualenv = ">=20.10.0"
 
 [[package]]
+name = "pynmeagps"
+version = "1.0.50"
+description = "NMEA protocol parser and generator"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "pynmeagps-1.0.50-py3-none-any.whl", hash = "sha256:24f6389f77f9d5f583bc677f141d7e7a76d48abb9a3a968dab26f77efe59fb1e"},
+    {file = "pynmeagps-1.0.50.tar.gz", hash = "sha256:7ebefbe697fa71c939df176631674c15879863c0362af21f062bc9ff352ad246"},
+]
+
+[package.extras]
+deploy = ["build", "pip", "setuptools (>=66.0)", "wheel"]
+test = ["Sphinx", "bandit", "black", "isort", "pylint", "pytest", "pytest-cov", "sphinx-rtd-theme"]
+
+[[package]]
+name = "pyserial"
+version = "3.5"
+description = "Python Serial Port Extension"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "pyserial-3.5-py2.py3-none-any.whl", hash = "sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0"},
+    {file = "pyserial-3.5.tar.gz", hash = "sha256:3c77e014170dfffbd816e6ffc205e9842efb10be9f58ec16d3e8675b4925cddb"},
+]
+
+[package.extras]
+cp2110 = ["hidapi"]
+
+[[package]]
 name = "pyyaml"
 version = "6.0.2"
 description = "YAML parser and emitter for Python"
 optional = false
 python-versions = ">=3.8"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "PyYAML-6.0.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:0a9a2848a5b7feac301353437eb7d5957887edbf81d56e903999a75a3d743086"},
     {file = "PyYAML-6.0.2-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:29717114e51c84ddfba879543fb232a6ed60086602313ca38cce623c1d62cfbf"},
@@ -266,6 +321,35 @@ files = [
 ]
 
 [[package]]
+name = "serial"
+version = "0.0.97"
+description = "A framework for serializing/deserializing JSON/YAML/XML into python class instances and vice versa"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "serial-0.0.97-py2.py3-none-any.whl", hash = "sha256:e887f06e07e190e39174b694eee6724e3c48bd361be1d97964caef5d5b61c73b"},
+    {file = "serial-0.0.97.tar.gz", hash = "sha256:542150a127ddbf5ed2acc3a6ac4ce807cbcdae3b197acf785bbda6565c94f848"},
+]
+
+[package.dependencies]
+future = ">=0.17.1"
+iso8601 = ">=0.1.12"
+pyyaml = ">=3.13"
+
+[[package]]
+name = "types-pyserial"
+version = "3.5.0.20250326"
+description = "Typing stubs for pyserial"
+optional = false
+python-versions = ">=3.9"
+groups = ["dev"]
+files = [
+    {file = "types_pyserial-3.5.0.20250326-py3-none-any.whl", hash = "sha256:df0ce1aab69f8af3805342838c84133f443816d0a36e8bf52948002383af378a"},
+    {file = "types_pyserial-3.5.0.20250326.tar.gz", hash = "sha256:bb58a4ee5f59ccfccdc69e9cd47ae4b163cf8e0b2609e0eb34d09692af5bb2f1"},
+]
+
+[[package]]
 name = "typing-extensions"
 version = "4.13.2"
 description = "Backported and Experimental Type Hints for Python 3.8+"
@@ -301,4 +385,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13"
-content-hash = "3aa2df2d07af70eb23953506e4282569e66b51100345bc7091ee89299fbe9386"
+content-hash = "5832d20a6f85f8ff743537566a5a93df850a8fe1b7f3f5bca30e3e17870480e8"
