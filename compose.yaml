@@ -6,8 +6,6 @@ services:
     ports:
       - "5683:5683/udp"
     restart: unless-stopped
-    networks:
-      - monitoring
   
   postgres:
     image: postgis/postgis:16-3.4
@@ -22,7 +20,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U outpost"]
       interval: 30s
       timeout: 10s
       retries: 3

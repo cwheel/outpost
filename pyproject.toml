@@ -12,7 +12,8 @@ dependencies = [
     "aiocoap (>=0.4.14,<0.5.0)",
     "pynmeagps (>=1.0.50,<2.0.0)",
     "serial (>=0.0.97,<0.0.98)",
-    "pyserial (>=3.5,<4.0)"
+    "pyserial (>=3.5,<4.0)",
+    "asyncpg (>=0.30.0,<0.31.0)"
 ]
 
 
