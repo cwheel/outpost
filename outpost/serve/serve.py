@@ -130,6 +130,8 @@ async def main() -> None:
         logger.error(f"Failed to load PSK, none provided")
         return
 
+    logger.info(f"trying to load psk:{psk_path}")
+
     try:
         psk = load_psk(psk_path)
         logger.info(f"Loaded PSK from {psk_path}")

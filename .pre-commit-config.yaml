@@ -11,4 +11,6 @@ repos:
     hooks:
       - id: mypy
         files: ^(outpost).*\.py$
-        args: [--strict, --ignore-missing-imports]
+        args: [outpost]
+        pass_filenames: false
+        additional_dependencies: [types-pyserial, types-cryptography, aiocoap, asyncpg, pynmeagps]
