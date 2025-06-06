@@ -1,12 +1,13 @@
 import asyncio
 from typing import List, Optional
 import asyncpg
-from asyncpg import Pool, Connection
+from asyncpg import Pool
+
 from outpost.logger import get_logger
+from outpost.position import PositionSample
+
 
 logger = get_logger()
-
-from outpost.position import PositionSample
 
 
 class PostgreSQLClient:
@@ -84,6 +85,10 @@ class PostgreSQLClient:
                         sample['speed'],
                         sample['altitude']
                     )
+
+                    if row is None:
+                        raise RuntimeError('INSERT did not return a row')
+                    
                     inserted_ids.append(row['id'])
                 
                 return inserted_ids

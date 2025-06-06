@@ -3,7 +3,6 @@ import signal
 import sys
 import os
 import aiocoap
-from aiocoap.resource import Resource
 from aiocoap.resource import Site
 from aiocoap import Message
 from typing_extensions import Self
@@ -11,27 +10,32 @@ from typing_extensions import Self
 from outpost.batch import unpack_batch
 from outpost.serve.database import create_database_client
 from outpost.serve.database import PostgreSQLClient
+from outpost.serve.secured_resource import SecureResource
 from outpost.logger import get_logger
+from outpost.crypto import load_psk
+
 
 logger = get_logger()
 
-class HealthResource(Resource):
-    def __init__(self, db_client: PostgreSQLClient):
-        super().__init__()
+
+class HealthResource(SecureResource):
+    def __init__(self, db_client: PostgreSQLClient, psk: bytes):
+        super().__init__(psk)
         self.db_client = db_client
 
-    async def render_get(self, _: Message) -> Message:
+    async def secure_render_get(self, _: Message) -> Message:
         if self.db_client.is_healthy():
             return aiocoap.Message(payload=b"{'status': 'healthy'}")
         else:
             return aiocoap.Message(payload=b"{'status': 'unhealthy'}")
 
-class PositionResource(Resource):
-    def __init__(self, db_client: PostgreSQLClient):
-        super().__init__()
+
+class PositionResource(SecureResource):
+    def __init__(self, db_client: PostgreSQLClient, psk: bytes):
+        super().__init__(psk)
         self.db_client = db_client
     
-    async def render_post(self, request: Message) -> Message:
+    async def secure_render_post(self, request: Message) -> Message:
         try:
             batch = unpack_batch(request.payload)
 
@@ -44,11 +48,13 @@ class PositionResource(Resource):
             logger.error(f'Error processing positions: {e}')
             return aiocoap.Message(mtype=aiocoap.NON, code=aiocoap.INTERNAL_SERVER_ERROR)
 
+
 class OutpostServer:
-    def __init__(self: Self, host: str, port: int, database_url: str) -> None:
+    def __init__(self: Self, host: str, port: int, database_url: str, psk: bytes) -> None:
         self.host = host
         self.port = port
         self.database_url = database_url
+        self.psk = psk
         self.context: aiocoap.Context | None = None
         self.db_client: PostgreSQLClient | None = None
         self.shutdown_event = asyncio.Event()
@@ -59,8 +65,8 @@ class OutpostServer:
         if not self.db_client:
             raise RuntimeError("Database client not initialized")
 
-        root.add_resource(['health'], HealthResource(self.db_client))
-        root.add_resource(['p'], PositionResource(self.db_client))
+        root.add_resource(['health'], HealthResource(self.db_client, self.psk))
+        root.add_resource(['p'], PositionResource(self.db_client, self.psk))
         return root
     
     async def start(self: Self) -> None:
@@ -105,12 +111,27 @@ class OutpostServer:
 
         await self.shutdown_event.wait()
 
+
 async def main() -> None:
     host = os.getenv('OUTPOST_HOST', '0.0.0.0')
     port = int(os.getenv('OUTPOST_PORT', '5683'))
     database_url = os.getenv('DATABASE_URL', 'postgresql://outpost:outpost@postgres/outpost')
     
-    server = OutpostServer(host, port, database_url)
+    psk = None
+    psk_path = os.getenv('OUTPOST_PSK')
+
+    if psk_path is None:
+        logger.error(f'Failed to load PSK, none provided')
+        return
+
+    try:
+        psk = load_psk(psk_path)
+        logger.info(f'Loaded PSK from {psk_path}')
+    except Exception as e:
+        logger.error(f'Failed to load PSK: {e}')
+        sys.exit(1)
+    
+    server = OutpostServer(host, port, database_url, psk)
     
     try:
         await server.run()

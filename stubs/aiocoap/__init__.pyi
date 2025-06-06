@@ -10,6 +10,8 @@ class Message:
     payload: bytes
     code: Code
     token: Optional[bytes]
+    mtype: int
+
     def __init__(
         self, 
         payload: bytes = ..., 
@@ -17,6 +19,8 @@ class Message:
         code: Code = ..., 
         uri: Optional[str] = ...
     ) -> None: ...
+    
+    def get_request_uri(self) -> str: ...
 
 class Request:
     response: Awaitable[Message]
@@ -36,3 +40,5 @@ CON, NON, ACK, RST = Type.CON, Type.NON, Type.ACK, Type.RST
 
 POST = 2
 INTERNAL_SERVER_ERROR = 160
+UNAUTHORIZED = 129
+METHOD_NOT_ALLOWED = 133
