@@ -27,4 +27,5 @@ mypy = "^1.16.0"
 pre-commit = "^4.2.0"
 types-pyserial = "^3.5.0.20250326"
 types-cryptography = "^3.3.23.2"
+black = "^25.1.0"
 
