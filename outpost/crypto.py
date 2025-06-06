@@ -67,8 +67,6 @@ def encrypt_payload(payload: bytes, psk: bytes) -> bytes:
     except Exception as e:
         raise CryptoError(f"Encryption failed: {e}")
 
-    return b""
-
 
 def decrypt_payload(encrypted_payload: bytes, psk: bytes) -> bytes:
     if len(encrypted_payload) < NONCE_WIDTH + 16:  # AESGCM tag is 16 bytes
