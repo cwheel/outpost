@@ -2,8 +2,14 @@ import logging
 import queue
 import datetime
 from typing import cast, Optional
-from serial import Serial
 from pynmeagps import NMEAReader
+
+# Serial seems to be very sensitive to it's installation, and usually
+# fails to load on a Github runner
+try:
+    from serial import Serial
+except ImportError:
+    Serial = None  # type: ignore
 
 from outpost.position import PositionSample
 
