@@ -1,4 +1,3 @@
-import struct
 from typing import List
 from datetime import datetime
 
@@ -43,10 +42,13 @@ def pack_batch(batch: List[PositionSample]) -> bytes:
         if i == 0:
             lat_delta = 0
             lon_delta = 0
+            time_delta = 0
         else:
             # Reduced precision (to 10^4) for delta compression
             lat_delta = int((sample["latitude"] - previous_sample["latitude"]) / 1000)
             lon_delta = int((sample["longitude"] - previous_sample["longitude"]) / 1000)
+
+            time_delta = sample["time"] - previous_sample["time"]
 
             # Check coordinate deltas fit in 16-bit signed range
             if not (-32768 <= lat_delta <= 32767):
@@ -59,9 +61,12 @@ def pack_batch(batch: List[PositionSample]) -> bytes:
                     f"Longitude delta {lon_delta} exceeds 16-bit signed range"
                 )
 
-            previous_sample = sample
+            if not (-32768 <= time_delta <= 32767):
+                raise OverflowError(
+                    f"Time delta {time_delta} exceeds 16-bit signed range"
+                )
 
-        time_delta = sample["time"] - ref_timestamp
+            previous_sample = sample
 
         sample_data = pack_sample(
             time_delta, lat_delta, lon_delta, sample["flags"], sample["extra"]

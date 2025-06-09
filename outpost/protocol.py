@@ -10,8 +10,8 @@ OUTPOST_HEADER_WIDTH = 16  # in bytes
 OUTPOST_SAMPLE_WIDTH = 9  # in bytes
 
 # Flag bits for data type
-FLAG_HAS_ALTITUDE = 0x0
-FLAG_HAS_SPEED = 0x01
+FLAG_HAS_ALTITUDE = 0x01
+FLAG_HAS_SPEED = 0x02
 
 
 def to_fixed(sample: PositionSample) -> FixedPositionSample:
@@ -30,6 +30,9 @@ def to_fixed(sample: PositionSample) -> FixedPositionSample:
     elif altitude is not None:
         flags = FLAG_HAS_ALTITUDE
         extra_fixed = int(altitude)  # 1m precision
+    else:
+        flags = 0
+        extra_fixed = 0
 
     return FixedPositionSample(
         time=timestamp,
@@ -110,3 +113,42 @@ def unpack_sample(
         ),
         samples[OUTPOST_SAMPLE_WIDTH:],
     )
+
+
+def samples_can_be_in_same_batch(
+    sample1: PositionSample, sample2: PositionSample
+) -> bool:
+    """
+    Check if two samples can be encoded in the same batch without causing overflow.
+
+    This function validates that:
+    1. Time delta between samples fits in 16-bit signed range
+    2. Coordinate deltas fit in 16-bit signed range
+
+    Args:
+        sample1: First sample (earlier in time)
+        sample2: Second sample (later in time)
+
+    Returns:
+        True if samples can be in same batch, False if packing would cause overflow
+    """
+    # Convert to fixed-point representation for delta calculations
+    fixed1 = to_fixed(sample1)
+    fixed2 = to_fixed(sample2)
+
+    # Check time delta (must fit in 16-bit signed range)
+    time_delta = fixed2["time"] - fixed1["time"]
+    if not (-32768 <= time_delta <= 32767):
+        return False
+
+    # Check coordinate deltas (reduced precision for delta compression)
+    lat_delta = int((fixed2["latitude"] - fixed1["latitude"]) / 1000)
+    lon_delta = int((fixed2["longitude"] - fixed1["longitude"]) / 1000)
+
+    if not (-32768 <= lat_delta <= 32767):
+        return False
+
+    if not (-32768 <= lon_delta <= 32767):
+        return False
+
+    return True

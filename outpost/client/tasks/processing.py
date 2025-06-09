@@ -9,6 +9,7 @@ import aiocoap
 from outpost.position import PositionSample
 from outpost.batch import pack_batch
 from outpost.crypto import encrypt_payload, CryptoError
+from outpost.protocol import samples_can_be_in_same_batch
 
 # Minimum number of samples to submit in a batch at once
 MINIMUM_BATCH_SIZE = 5
@@ -55,7 +56,29 @@ class BatchProcessingTask:
                     break
 
                 try:
-                    batch.append(self.sample_queue.get())
+                    # Peek at the next sample to check if it can be added to current batch
+                    next_sample = self.sample_queue.get()
+
+                    # Check if this sample can be added to the current batch
+                    if batch and not samples_can_be_in_same_batch(
+                        batch[-1], next_sample
+                    ):
+                        # Can't add this sample to current batch - put it back and send current batch
+                        # Note: We can't actually put it back with Queue, so we'll start a new batch with it
+                        # Send current batch and start new one with this sample
+                        logging.info(
+                            f"Finalizing batch of {len(batch)} samples due to overflow constraint"
+                        )
+                        self._set_sending(True)
+                        try:
+                            self._send_batch(batch)
+                        finally:
+                            self._set_sending(False)
+                        batch = [next_sample]  # Start new batch with this sample
+                    else:
+                        # Sample can be safely added to batch
+                        batch.append(next_sample)
+
                     self.sample_queue.task_done()
                 except queue.Empty:
                     continue

@@ -13,4 +13,4 @@ repos:
         files: ^(outpost).*\.py$
         args: [outpost]
         pass_filenames: false
-        additional_dependencies: [types-pyserial, types-cryptography, aiocoap, asyncpg, pynmeagps]
+        language: system
