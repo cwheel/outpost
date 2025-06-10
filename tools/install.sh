@@ -85,9 +85,9 @@ else
     # For updates, load existing configuration
     if [[ -f "$INSTALL_DIR/config.json" ]]; then
         echo "Loading existing configuration..."
-        EXISTING_DEVICE=$(jq -r '.device' "$INSTALL_DIR/config.json")
-        EXISTING_BAUD=$(jq -r '.baud' "$INSTALL_DIR/config.json")
-        EXISTING_HOST=$(jq -r '.outpost_host' "$INSTALL_DIR/config.json")
+        EXISTING_DEVICE=$(python3 -c "import json; print(json.load(open('$INSTALL_DIR/config.json'))['device'])")
+        EXISTING_BAUD=$(python3 -c "import json; print(json.load(open('$INSTALL_DIR/config.json'))['baud'])")
+        EXISTING_HOST=$(python3 -c "import json; print(json.load(open('$INSTALL_DIR/config.json'))['outpost_host'])")
         
         # Use existing values if not specified on command line
         [[ "$DEVICE" == "/dev/ttyUSB0" ]] && DEVICE="$EXISTING_DEVICE"
@@ -148,10 +148,16 @@ EOF
 else
     echo "Updating configuration file..."
     # Update config with potentially new values while preserving others
-    jq --arg device "$DEVICE" --arg baud "$BAUD" --arg host "$HOST" \
-       '.device = $device | .baud = ($baud | tonumber) | .outpost_host = $host' \
-       "$INSTALL_DIR/config.json" > "$INSTALL_DIR/config.json.tmp" && \
-       mv "$INSTALL_DIR/config.json.tmp" "$INSTALL_DIR/config.json"
+    python3 -c "
+import json
+with open('$INSTALL_DIR/config.json', 'r') as f:
+    config = json.load(f)
+config['device'] = '$DEVICE'
+config['baud'] = $BAUD
+config['outpost_host'] = '$HOST'
+with open('$INSTALL_DIR/config.json', 'w') as f:
+    json.dump(config, f, indent=4)
+"
 fi
 
 # Create startup script
@@ -160,8 +166,8 @@ cat > "$INSTALL_DIR/start.sh" << 'EOF'
 #!/bin/bash
 
 # Wait for GPS device to be available
-GPS_DEVICE=$(jq -r '.device' /etc/outpost/config.json)
-HOST_CHECK=$(jq -r '.outpost_host' /etc/outpost/config.json | cut -d: -f1)
+GPS_DEVICE=$(python3 -c "import json; print(json.load(open('/etc/outpost/config.json'))['device'])")
+HOST_CHECK=$(python3 -c "import json; print(json.load(open('/etc/outpost/config.json'))['outpost_host'])" | cut -d: -f1)
 
 echo "Waiting for GPS device $GPS_DEVICE..."
 for i in {1..30}; do
