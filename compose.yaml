@@ -6,6 +6,8 @@ services:
       - OUTPOST_PSK=${OUTPOST_PSK}
     ports:
       - "5683:5683/udp"
+    volumes:
+      - ./logs:/var/log
     restart: unless-stopped
   
   postgres:
