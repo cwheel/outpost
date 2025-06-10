@@ -3,3 +3,4 @@ __pycache__/
 .mypy_cache
 dev.psk
 .pytest_cache
+logs
