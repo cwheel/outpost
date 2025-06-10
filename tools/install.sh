@@ -131,7 +131,7 @@ fi
 
 # Install Python dependencies
 echo "Installing Python dependencies..."
-pip3 install aiocoap pynmeagps pyserial asyncpg cryptography
+pip3 install aiocoap pynmeagps pyserial cryptography
 
 # Create or update configuration file
 if [[ "$IS_UPDATE" = false ]]; then
