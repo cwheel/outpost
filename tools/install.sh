@@ -105,9 +105,11 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # Stop service if running (for updates)
-if [[ "$IS_UPDATE" = true ]] && systemctl is-active --quiet "$SERVICE_NAME"; then
-    echo "Stopping service for update..."
-    systemctl stop "$SERVICE_NAME"
+if [[ "$IS_UPDATE" = true ]] && [[ -f "/etc/init.d/$SERVICE_NAME" ]]; then
+    if /etc/init.d/"$SERVICE_NAME" status >/dev/null 2>&1; then
+        echo "Stopping service for update..."
+        /etc/init.d/"$SERVICE_NAME" stop
+    fi
 fi
 
 # Create installation directory
@@ -201,49 +203,138 @@ EOF
 
 chmod +x "$INSTALL_DIR/start.sh"
 
-# Create systemd service file
-echo "Creating systemd service..."
-cat > "/etc/systemd/system/$SERVICE_NAME.service" << EOF
-[Unit]
-Description=Outpost GPS Client
-After=network.target
-Wants=network.target
+# Create init.d service script
+echo "Creating init.d service script..."
+cat > "/etc/init.d/$SERVICE_NAME" << 'EOF'
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          outpost-client
+# Required-Start:    $network $remote_fs $syslog
+# Required-Stop:     $network $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Outpost GPS Client
+# Description:       GPS position tracking client for Outpost server
+### END INIT INFO
 
-[Service]
-Type=simple
-User=root
-WorkingDirectory=$INSTALL_DIR
-ExecStart=$INSTALL_DIR/start.sh
-Restart=always
-RestartSec=10
-StandardOutput=journal
-StandardError=journal
+DAEMON="outpost-client"
+DAEMON_USER="root"
+DAEMON_PATH="/etc/outpost"
+DAEMON_SCRIPT="$DAEMON_PATH/start.sh"
+LOCK_FILE="/var/lock/subsys/$DAEMON"
+PID_FILE="/var/run/$DAEMON.pid"
 
-[Install]
-WantedBy=multi-user.target
+start() {
+    echo -n "Starting $DAEMON: "
+    if [[ -f $PID_FILE ]] && kill -0 $(cat $PID_FILE) 2>/dev/null; then
+        echo "already running"
+        return 1
+    fi
+    
+    cd "$DAEMON_PATH"
+    nohup "$DAEMON_SCRIPT" > /var/log/$DAEMON.log 2>&1 &
+    echo $! > "$PID_FILE"
+    
+    if [[ $? -eq 0 ]]; then
+        touch "$LOCK_FILE"
+        echo "started"
+        return 0
+    else
+        echo "failed"
+        return 1
+    fi
+}
+
+stop() {
+    echo -n "Stopping $DAEMON: "
+    if [[ ! -f $PID_FILE ]]; then
+        echo "not running"
+        return 1
+    fi
+    
+    PID=$(cat $PID_FILE)
+    if kill -TERM $PID 2>/dev/null; then
+        # Wait for process to terminate
+        for i in {1..10}; do
+            if ! kill -0 $PID 2>/dev/null; then
+                break
+            fi
+            sleep 1
+        done
+        
+        # Force kill if still running
+        if kill -0 $PID 2>/dev/null; then
+            kill -KILL $PID 2>/dev/null
+        fi
+        
+        rm -f "$PID_FILE" "$LOCK_FILE"
+        echo "stopped"
+        return 0
+    else
+        echo "failed"
+        return 1
+    fi
+}
+
+status() {
+    if [[ -f $PID_FILE ]] && kill -0 $(cat $PID_FILE) 2>/dev/null; then
+        echo "$DAEMON is running (PID $(cat $PID_FILE))"
+        return 0
+    else
+        echo "$DAEMON is not running"
+        return 1
+    fi
+}
+
+restart() {
+    stop
+    sleep 2
+    start
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        status
+        ;;
+    restart|reload)
+        restart
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|status|restart}"
+        exit 1
+        ;;
+esac
+
+exit $?
 EOF
+
+chmod +x "/etc/init.d/$SERVICE_NAME"
 
 # Enable and start the service
 if [[ "$IS_UPDATE" = false ]]; then
     echo "Enabling and starting service..."
-    systemctl daemon-reload
-    systemctl enable "$SERVICE_NAME"
-    systemctl start "$SERVICE_NAME"
+    update-rc.d "$SERVICE_NAME" defaults
+    /etc/init.d/"$SERVICE_NAME" start
     
     echo ""
     echo "Installation complete!"
 else
     echo "Restarting service..."
-    systemctl daemon-reload
-    systemctl start "$SERVICE_NAME"
+    /etc/init.d/"$SERVICE_NAME" restart
     
     echo ""
     echo "Update complete!"
 fi
 
 echo "Service status:"
-systemctl status "$SERVICE_NAME" --no-pager -l
+/etc/init.d/"$SERVICE_NAME" status
 echo ""
-echo "To view logs: journalctl -u $SERVICE_NAME -f"
-echo "To restart: systemctl restart $SERVICE_NAME"
-echo "To stop: systemctl stop $SERVICE_NAME"
+echo "To view logs: tail -f /var/log/$SERVICE_NAME.log"
+echo "To restart: /etc/init.d/$SERVICE_NAME restart"
+echo "To stop: /etc/init.d/$SERVICE_NAME stop"

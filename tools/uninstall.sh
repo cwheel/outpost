@@ -46,21 +46,19 @@ fi
 
 # Stop and disable the service
 echo "Stopping and disabling service..."
-if systemctl is-active --quiet "$SERVICE_NAME"; then
-    systemctl stop "$SERVICE_NAME"
-    echo "Service stopped"
-fi
-
-if systemctl is-enabled --quiet "$SERVICE_NAME" 2>/dev/null; then
-    systemctl disable "$SERVICE_NAME"
+if [[ -f "/etc/init.d/$SERVICE_NAME" ]]; then
+    if /etc/init.d/"$SERVICE_NAME" status >/dev/null 2>&1; then
+        /etc/init.d/"$SERVICE_NAME" stop
+        echo "Service stopped"
+    fi
+    
+    # Disable service from startup
+    update-rc.d "$SERVICE_NAME" remove 2>/dev/null || true
     echo "Service disabled"
-fi
-
-# Remove systemd service file
-if [[ -f "/etc/systemd/system/$SERVICE_NAME.service" ]]; then
-    echo "Removing systemd service file..."
-    rm -f "/etc/systemd/system/$SERVICE_NAME.service"
-    systemctl daemon-reload
+    
+    # Remove init.d service file
+    echo "Removing init.d service file..."
+    rm -f "/etc/init.d/$SERVICE_NAME"
 fi
 
 # Remove installation directory
@@ -82,10 +80,10 @@ echo "Uninstallation complete!"
 echo "The system has been restored to its original state."
 
 # Verify cleanup
-if [[ ! -d "$INSTALL_DIR" ]] && [[ ! -f "/etc/systemd/system/$SERVICE_NAME.service" ]]; then
+if [[ ! -d "$INSTALL_DIR" ]] && [[ ! -f "/etc/init.d/$SERVICE_NAME" ]]; then
     echo "✓ All files successfully removed"
 else
     echo "⚠ Some files may still remain:"
     [[ -d "$INSTALL_DIR" ]] && echo "  - $INSTALL_DIR still exists"
-    [[ -f "/etc/systemd/system/$SERVICE_NAME.service" ]] && echo "  - Service file still exists"
+    [[ -f "/etc/init.d/$SERVICE_NAME" ]] && echo "  - Service file still exists"
 fi
