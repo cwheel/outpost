@@ -1,4 +1,4 @@
-# 🏕️🚐 Outpost
+# 🏕️ 🚐 Outpost
 
 Near real time GPS synchronization from remote Victron (VenusOS) systems to PostGIS databases for future analysis. Perfect for plotting your off-grid van adventures.
 
@@ -24,7 +24,7 @@ GPS positions are transmited using only _9 bytes_ per sample (with a 16 byte hea
    ```bash
    ./tools/generate_keys.sh outpost.psk
    ```
-
+   
 2. **Deploy with Docker Compose:**
    ```bash
    export OUTPOST_PSK=outpost.psk
@@ -45,6 +45,8 @@ GPS positions are transmited using only _9 bytes_ per sample (with a 16 byte hea
    ```bash
    ./tools/install.sh --psk-file <your-psk>.psk --host your-server.com --device /dev/ttyUSB0 --baud 38400
    ```
+
+      _Note: The installer requires `pip3` be installed. This is not included in the default Venus image. See [here](https://github.com/victronenergy/venus/wiki/commandline---development#opkg) for details on using `opkg` to install pip._
 
    The path to your GPS device is highly dependent on your exact system configuration, as is the baud rate. VenusOS only supports GPS devices with a baud of 4800 or 38400, so your device is _likely_ using one of those.
 
