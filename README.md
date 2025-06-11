@@ -14,7 +14,7 @@ The Outpost protocol uses a custom binary format over CoAP to minimize bandwith 
 - **Batch transmission**: Multiple GPS positions are batched together for efficient transport (up to 40 at a time)
 - **AES-256-GCM encryption**: Secure transmission with pre-shared keys instead of heavy weight TLS
 
-GPS positions are transmited using only _9 bytes_ per sample (with a 16 byte header)
+GPS positions are transmited using only _9 bytes_ per sample (with a 16 byte header). Outpost prioritizes small message size over all else, and thus does _not_ include any kind of system/device identifier. This is trivial to add (and would only require one additional byte per payload), but alas I only have one Victron install/van.
 
 ## Installation
 
