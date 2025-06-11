@@ -69,8 +69,4 @@ To update an existing client installation, simply re-run the install script (the
 
 ## GPS Samples
 
-GPS data is stored in the `positions` table with PostGIS geometry columns. The client automatically handles:
-- GPS parsing (NMEA format)
-- Position filtering (duplicate detection)
-- Network connectivity monitoring
-- Automatic reconnection
+GPS data is stored in the `positions` table with PostGIS geometry columns. The client automatically deduplicates similar positions before submission to the server.
