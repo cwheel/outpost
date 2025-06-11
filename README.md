@@ -1,14 +1,14 @@
-# 🏕️ 🚐 Outpost
+# 🏕️ 🚐 outpost
 
 Near real time GPS synchronization from remote Victron (VenusOS) systems to PostGIS databases for future analysis. Perfect for plotting your off-grid van adventures.
 
 ## Overview
 
-Outpost provides highly efficient transmission of GPS data from remote installations to a PostgreSQL database equipped with PostGIS. It's designed specifically for cellular and satellite networks where bandwidth is limited or expensive, and optimization is critical.
+outpost provides highly efficient transmission of GPS data from remote installations to a PostgreSQL database equipped with PostGIS. It's designed specifically for cellular and satellite networks where bandwidth is limited or expensive, and optimization is critical.
 
 ## Protocol
 
-The Outpost protocol uses a custom binary format over CoAP to minimize bandwith use. Highlights include:
+The outpost protocol uses a custom binary format over CoAP to minimize bandwith use. Highlights include:
 
 - **Delta compression**: Position samples are encoded as deltas from a reference point
 - **Batch transmission**: Multiple GPS positions are batched together for efficient transport (up to 40 at a time)
@@ -39,7 +39,7 @@ Given the limited range of values representable using only 9 bytes and the diffi
    ```
 
    This starts:
-   - Outpost server on port 5683/udp
+   - outpost server on port 5683/udp
    - PostgreSQL with PostGIS on port 5432 (local host access only)
 
    Server logs can be found in `.logs/`.
