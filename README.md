@@ -27,9 +27,9 @@ Given the limited range of values representable using only 9 bytes and the diffi
 
 ### Server Setup
 
-1. **Generate keys:**
+1. **Generate key:**
    ```bash
-   ./tools/generate_keys.sh outpost.psk
+   ./tools/generate_key.sh outpost.psk
    ```
    
 2. **Deploy with Docker Compose:**
