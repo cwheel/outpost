@@ -133,7 +133,7 @@ fi
 
 # Install Python dependencies
 echo "Installing Python dependencies..."
-pip3 install aiocoap pynmeagps pyserial cryptography
+pip3 install aiocoap pynmeagps pyserial cryptography websockets
 
 # Create or update configuration file
 if [[ "$IS_UPDATE" = false ]]; then
