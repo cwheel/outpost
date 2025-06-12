@@ -125,7 +125,9 @@ class BatchProcessingTask:
         while self.running:
             try:
                 request = aiocoap.Message(
-                    code=aiocoap.POST, payload=batch_data, uri=f"{self.outpost_host}/p"
+                    code=aiocoap.POST,
+                    payload=batch_data,
+                    uri=f"coap://{self.outpost_host}/p",
                 )
 
                 # Send with 60 second timeout
