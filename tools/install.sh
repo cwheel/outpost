@@ -133,7 +133,10 @@ fi
 
 # Install Python dependencies
 echo "Installing Python dependencies..."
-pip3 install aiocoap pynmeagps pyserial cryptography websockets
+pip3 install aiocoap pynmeagps pyserial cryptography
+
+# The websockets library that VenusOS ships with is too out of date
+pip3 install --upgrade websockets
 
 # Create or update configuration file
 if [[ "$IS_UPDATE" = false ]]; then
