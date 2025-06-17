@@ -62,7 +62,11 @@ class PositionCollectionTask:
                         sample = None
 
                         if message.msgID == "RMC":
-                            current_date = cast(datetime.date, message.date)
+                            # If this message has a malformed date, skip it and wait for one with a valid date
+                            if message.date is None or message.date == "":
+                                continue
+
+                            current_date = message.date
 
                             sample = PositionSample(
                                 latitude=cast(float, message.lat),
